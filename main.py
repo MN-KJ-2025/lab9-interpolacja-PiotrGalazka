@@ -18,7 +18,14 @@ def chebyshev_nodes(n: int = 10) -> np.ndarray | None:
         (np.ndarray): Wektor węzłów Czebyszewa (n,).
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
+    if not isinstance(n,int) or n<2:
+        return None
+    
+    x = np.array([])
+    for k in range(0, n):
+        xk = np.cos(k*np.pi/(n-1))
+        x = np.append(x, [xk])
+    return x
 
 
 def bar_cheb_weights(n: int = 10) -> np.ndarray | None:
@@ -31,11 +38,17 @@ def bar_cheb_weights(n: int = 10) -> np.ndarray | None:
         (np.ndarray): Wektor wag dla węzłów Czebyszewa (n,).
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
-
+    w = np.array([])
+    for j in range(n):
+        if j == 0 or j == n-1:
+            wj= np.power(-1, j)*1/2
+        else:
+            wj= np.power(-1, j)
+        w = np.append(w,[wj])
+    return w
 
 def barycentric_inte(
-    xi: np.ndarray, yi: np.ndarray, wi: np.ndarray, x: np.ndarray
+    xi: np.ndarray, yi: np.ndarray, wi: np.ndarray, X: np.ndarray
 ) -> np.ndarray | None:
     """Funkcja przeprowadza interpolację metodą barycentryczną dla zadanych 
     węzłów xi i wartości funkcji interpolowanej yi używając wag wi. Zwraca 
@@ -52,7 +65,16 @@ def barycentric_inte(
         (np.ndarray): Wektor wartości funkcji interpolującej (n,).
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
+    Y=[]
+    for x in np.nditer(X):
+        if x in xi:
+            #omijamy dzielenie przez 0
+            Y.append(yi[np.where(xi==x)[0][0]])
+        else:
+            #wzór w drugiej formie
+            L=wi/(x-xi)
+            Y.append(yi@L/sum(L)) 
+    return np.array(Y)
 
 
 def L_inf(
@@ -66,9 +88,19 @@ def L_inf(
             skalara, listy lub wektora (n,).
         x (int | float | list | np.ndarray): Wartość przybliżona w postaci 
             skalara, listy lub wektora (n,).
-
+    
     Returns:
         (float): Wartość normy L-nieskończoność.
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
+    if not isinstance(x,(int,float,list,np.ndarray)) or not isinstance(xr,(int,float,list,np.ndarray)):
+        return None
+
+    if isinstance(x,(int,float)):
+        return  abs(xr - x)
+    if isinstance(x, list):
+        lista = [abs(i - j) for i, j in zip(xr, x)]
+        return max(lista)
+    if isinstance(x, np.ndarray):
+        lista = np.abs(xr-x)
+        return np.max(lista)
